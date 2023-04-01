@@ -15,7 +15,7 @@ class Gitter(OutputAdapter):
         self.gitter_room = kwargs.get('gitter_room')
         self.gitter_api_token = kwargs.get('gitter_api_token')
 
-        authorization_header = 'Bearer {}'.format(self.gitter_api_token)
+        authorization_header = f'Bearer {self.gitter_api_token}'
 
         self.headers = {
             'Authorization': authorization_header,
@@ -30,7 +30,7 @@ class Gitter(OutputAdapter):
     def _validate_status_code(self, response):
         code = response.status_code
         if code not in [200, 201]:
-            raise self.HTTPStatusException('{} status code recieved'.format(code))
+            raise self.HTTPStatusException(f'{code} status code recieved')
 
     def join_room(self, room_name):
         """
@@ -38,15 +38,13 @@ class Gitter(OutputAdapter):
         """
         import requests
 
-        endpoint = '{}rooms'.format(self.gitter_host)
+        endpoint = f'{self.gitter_host}rooms'
         response = requests.post(
             endpoint,
             headers=self.headers,
             json={'uri': room_name}
         )
-        self.logger.info('{} status joining room {}'.format(
-            response.status_code, endpoint
-        ))
+        self.logger.info(f'{response.status_code} status joining room {endpoint}')
         self._validate_status_code(response)
         return response.json()
 
@@ -56,15 +54,13 @@ class Gitter(OutputAdapter):
         """
         import requests
 
-        endpoint = '{}rooms/{}/chatMessages'.format(self.gitter_host, self.room_id)
+        endpoint = f'{self.gitter_host}rooms/{self.room_id}/chatMessages'
         response = requests.post(
             endpoint,
             headers=self.headers,
             json={'text': text}
         )
-        self.logger.info('{} sending message to {}'.format(
-            response.status_code, endpoint
-        ))
+        self.logger.info(f'{response.status_code} sending message to {endpoint}')
         self._validate_status_code(response)
         return response.json()
 

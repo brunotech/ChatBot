@@ -11,7 +11,7 @@ class Response(object):
         return self.text
 
     def __repr__(self):
-        return '<Response text:%s>' % (self.text)
+        return f'<Response text:{self.text}>'
 
     def __hash__(self):
         return hash(self.text)
@@ -26,9 +26,4 @@ class Response(object):
         return self.text == other
 
     def serialize(self):
-        data = {}
-
-        data['text'] = self.text
-        data['occurrence'] = self.occurrence
-
-        return data
+        return {'text': self.text, 'occurrence': self.occurrence}

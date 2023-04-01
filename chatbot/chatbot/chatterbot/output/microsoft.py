@@ -21,9 +21,7 @@ class Microsoft(OutputAdapter):
         )
         self.conversation_id = kwargs.get('conversation_id')
 
-        authorization_header = 'BotConnector {}'.format(
-            self.direct_line_token_or_secret
-        )
+        authorization_header = f'BotConnector {self.direct_line_token_or_secret}'
 
         self.headers = {
             'Authorization': authorization_header,
@@ -33,7 +31,7 @@ class Microsoft(OutputAdapter):
     def _validate_status_code(self, response):
         status_code = response.status_code
         if status_code not in [200, 204]:
-            raise self.HTTPStatusException('{} status code recieved'.format(status_code))
+            raise self.HTTPStatusException(f'{status_code} status code recieved')
 
     def get_most_recent_message(self):
         """
@@ -51,9 +49,9 @@ class Microsoft(OutputAdapter):
             verify=False
         )
 
-        self.logger.info('{} retrieving most recent messages {}'.format(
-            response.status_code, endpoint
-        ))
+        self.logger.info(
+            f'{response.status_code} retrieving most recent messages {endpoint}'
+        )
 
         self._validate_status_code(response)
 
@@ -84,16 +82,14 @@ class Microsoft(OutputAdapter):
             })
         )
 
-        self.logger.info('{} sending message {}'.format(
-            response.status_code, message_url
-        ))
+        self.logger.info(f'{response.status_code} sending message {message_url}')
         self._validate_status_code(response)
         # Microsoft return 204 on operation succeeded and no content was returned.
         return self.get_most_recent_message()
 
     def process_response(self, statement, session_id=None):
         data = self.send_message(self.conversation_id, statement.text)
-        self.logger.info('processing user response {}'.format(data))
+        self.logger.info(f'processing user response {data}')
         return statement
 
     class HTTPStatusException(Exception):

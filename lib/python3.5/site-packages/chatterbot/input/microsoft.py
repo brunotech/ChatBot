@@ -22,10 +22,9 @@ class Microsoft(InputAdapter):
         # NOTE: Direct Line client credentials are different from your bot's
         # credentials
         self.direct_line_token_or_secret = kwargs.\
-            get('direct_line_token_or_secret')
+                get('direct_line_token_or_secret')
 
-        authorization_header = 'BotConnector  {}'.\
-            format(self.direct_line_token_or_secret)
+        authorization_header = f'BotConnector  {self.direct_line_token_or_secret}'
 
         self.headers = {
             'Authorization': authorization_header,
@@ -40,9 +39,8 @@ class Microsoft(InputAdapter):
 
     def _validate_status_code(self, response):
         code = response.status_code
-        if not code == 200:
-            raise self.HTTPStatusException('{} status code recieved'.
-                                           format(code))
+        if code != 200:
+            raise self.HTTPStatusException(f'{code} status code recieved')
 
     def start_conversation(self):
         import requests
@@ -53,9 +51,7 @@ class Microsoft(InputAdapter):
             headers=self.headers,
             verify=False
         )
-        self.logger.info('{} starting conversation {}'.format(
-            response.status_code, endpoint
-        ))
+        self.logger.info(f'{response.status_code} starting conversation {endpoint}')
         self._validate_status_code(response)
         return response.json()
 
@@ -63,7 +59,7 @@ class Microsoft(InputAdapter):
         import requests
 
         endpoint = '{host}/api/conversations/{id}/messages'\
-            .format(host=self.directline_host,
+                .format(host=self.directline_host,
                     id=self.conversation_id)
 
         response = requests.get(
@@ -72,9 +68,9 @@ class Microsoft(InputAdapter):
             verify=False
         )
 
-        self.logger.info('{} retrieving most recent messages {}'.format(
-            response.status_code, endpoint
-        ))
+        self.logger.info(
+            f'{response.status_code} retrieving most recent messages {endpoint}'
+        )
 
         self._validate_status_code(response)
 
@@ -92,13 +88,11 @@ class Microsoft(InputAdapter):
             data = self.get_most_recent_message()
             if data and data['id']:
                 new_message = True
-            else:
-                pass
             sleep(3.5)
 
         text = data['text']
         statement = Statement(text)
-        self.logger.info('processing user statement {}'.format(statement))
+        self.logger.info(f'processing user statement {statement}')
 
         return statement
 

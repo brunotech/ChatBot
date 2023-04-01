@@ -23,13 +23,13 @@ class Mailgun(InputAdapter):
 
         yesterday = datetime.datetime.now() - datetime.timedelta(1)
         return requests.get(
-            '{}/events'.format(self.endpoint),
+            f'{self.endpoint}/events',
             auth=('api', self.api_key),
             params={
                 'begin': yesterday.isoformat(),
                 'ascending': 'yes',
-                'limit': 1
-            }
+                'limit': 1,
+            },
         )
 
     def get_stored_email_urls(self):
@@ -37,9 +37,8 @@ class Mailgun(InputAdapter):
         data = response.json()
 
         for item in data.get('items', []):
-            if 'storage' in item:
-                if 'url' in item['storage']:
-                    yield item['storage']['url']
+            if 'storage' in item and 'url' in item['storage']:
+                yield item['storage']['url']
 
     def get_message(self, url):
         import requests

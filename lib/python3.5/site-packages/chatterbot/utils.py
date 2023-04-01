@@ -55,17 +55,12 @@ def validate_adapter_class(validate_class, adapter_class):
 
         if not validate_class:
             raise Adapter.InvalidAdapterTypeException(
-                'The dictionary {} must contain a value for "import_path"'.format(
-                    str(origional_data)
-                )
+                f'The dictionary {str(origional_data)} must contain a value for "import_path"'
             )
 
     if not issubclass(import_module(validate_class), adapter_class):
         raise Adapter.InvalidAdapterTypeException(
-            '{} must be a subclass of {}'.format(
-                validate_class,
-                adapter_class.__name__
-            )
+            f'{validate_class} must be a subclass of {adapter_class.__name__}'
         )
 
 
@@ -110,7 +105,7 @@ def nltk_download_corpus(resource_path):
     ####
     # Helps when resource_path=='sentiment/vader_lexicon''
     if not resource_path.endswith('/'):
-        resource_path = resource_path + '/'
+        resource_path = f'{resource_path}/'
 
     downloaded = False
 

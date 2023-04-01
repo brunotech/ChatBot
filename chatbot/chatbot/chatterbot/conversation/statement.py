@@ -29,7 +29,7 @@ class Statement(object):
         return self.text
 
     def __repr__(self):
-        return '<Statement text:%s>' % (self.text)
+        return f'<Statement text:{self.text}>'
 
     def __hash__(self):
         return hash(self.text)
@@ -77,14 +77,11 @@ class Statement(object):
         """
         if not isinstance(response, Response):
             raise Statement.InvalidTypeException(
-                'A {} was recieved when a {} instance was expected'.format(
-                    type(response),
-                    type(Response(''))
-                )
+                f"A {type(response)} was recieved when a {type(Response(''))} instance was expected"
             )
 
         updated = False
-        for index in range(0, len(self.in_response_to)):
+        for index in range(len(self.in_response_to)):
             if response.text == self.in_response_to[index].text:
                 self.in_response_to[index].occurrence += 1
                 updated = True
@@ -117,23 +114,26 @@ class Statement(object):
         :returns: Return the number of times the statement has been used as a response.
         :rtype: int
         """
-        for response in self.in_response_to:
-            if statement.text == response.text:
-                return response.occurrence
-
-        return 0
+        return next(
+            (
+                response.occurrence
+                for response in self.in_response_to
+                if statement.text == response.text
+            ),
+            0,
+        )
 
     def serialize(self):
         """
         :returns: A dictionary representation of the statement object.
         :rtype: dict
         """
-        data = {}
-
-        data['text'] = self.text
-        data['in_response_to'] = []
-        data['created_at'] = self.created_at
-        data['extra_data'] = self.extra_data
+        data = {
+            'text': self.text,
+            'in_response_to': [],
+            'created_at': self.created_at,
+            'extra_data': self.extra_data,
+        }
 
         for response in self.in_response_to:
             data['in_response_to'].append(response.serialize())

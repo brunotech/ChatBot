@@ -19,7 +19,7 @@ class Gitter(InputAdapter):
         self.only_respond_to_mentions = kwargs.get('gitter_only_respond_to_mentions', True)
         self.sleep_time = kwargs.get('gitter_sleep_time', 4)
 
-        authorization_header = 'Bearer {}'.format(self.gitter_api_token)
+        authorization_header = f'Bearer {self.gitter_api_token}'
 
         self.headers = {
             'Authorization': authorization_header,
@@ -38,7 +38,7 @@ class Gitter(InputAdapter):
     def _validate_status_code(self, response):
         code = response.status_code
         if code not in [200, 201]:
-            raise self.HTTPStatusException('{} status code recieved'.format(code))
+            raise self.HTTPStatusException(f'{code} status code recieved')
 
     def join_room(self, room_name):
         """
@@ -46,29 +46,25 @@ class Gitter(InputAdapter):
         """
         import requests
 
-        endpoint = '{}rooms'.format(self.gitter_host)
+        endpoint = f'{self.gitter_host}rooms'
         response = requests.post(
             endpoint,
             headers=self.headers,
             json={'uri': room_name}
         )
-        self.logger.info('{} joining room {}'.format(
-            response.status_code, endpoint
-        ))
+        self.logger.info(f'{response.status_code} joining room {endpoint}')
         self._validate_status_code(response)
         return response.json()
 
     def get_user_data(self):
         import requests
 
-        endpoint = '{}user'.format(self.gitter_host)
+        endpoint = f'{self.gitter_host}user'
         response = requests.get(
             endpoint,
             headers=self.headers
         )
-        self.logger.info('{} retrieving user data {}'.format(
-            response.status_code, endpoint
-        ))
+        self.logger.info(f'{response.status_code} retrieving user data {endpoint}')
         self._validate_status_code(response)
         return response.json()
 
@@ -78,17 +74,13 @@ class Gitter(InputAdapter):
         """
         import requests
 
-        endpoint = '{}user/{}/rooms/{}/unreadItems'.format(
-            self.gitter_host, self.user_id, self.room_id
-        )
+        endpoint = f'{self.gitter_host}user/{self.user_id}/rooms/{self.room_id}/unreadItems'
         response = requests.post(
             endpoint,
             headers=self.headers,
             json={'chat': message_ids}
         )
-        self.logger.info('{} marking messages as read {}'.format(
-            response.status_code, endpoint
-        ))
+        self.logger.info(f'{response.status_code} marking messages as read {endpoint}')
         self._validate_status_code(response)
         return response.json()
 
@@ -98,25 +90,17 @@ class Gitter(InputAdapter):
         """
         import requests
 
-        endpoint = '{}rooms/{}/chatMessages?limit=1'.format(self.gitter_host, self.room_id)
+        endpoint = f'{self.gitter_host}rooms/{self.room_id}/chatMessages?limit=1'
         response = requests.get(
             endpoint,
             headers=self.headers
         )
-        self.logger.info('{} getting most recent message'.format(
-            response.status_code
-        ))
+        self.logger.info(f'{response.status_code} getting most recent message')
         self._validate_status_code(response)
-        data = response.json()
-        if data:
-            return data[0]
-        return None
+        return data[0] if (data := response.json()) else None
 
     def _contains_mention(self, mentions):
-        for mention in mentions:
-            if self.username == mention.get('screenName'):
-                return True
-        return False
+        return any(self.username == mention.get('screenName') for mention in mentions)
 
     def should_respond(self, data):
         """
@@ -127,10 +111,7 @@ class Gitter(InputAdapter):
             unread = data.get('unread', False)
 
             if self.only_respond_to_mentions:
-                if unread and self._contains_mention(data['mentions']):
-                    return True
-                else:
-                    return False
+                return bool(unread and self._contains_mention(data['mentions']))
             elif unread:
                 return True
 

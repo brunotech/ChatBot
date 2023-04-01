@@ -16,11 +16,7 @@ class VariableInputTypeAdapter(InputAdapter):
     def detect_type(self, statement):
         import sys
 
-        if sys.version_info[0] == 3:
-            string_types = str
-        else:
-            string_types = basestring
-
+        string_types = str if sys.version_info[0] == 3 else basestring
         if hasattr(statement, 'text'):
             return self.OBJECT
         if isinstance(statement, string_types):
@@ -31,9 +27,7 @@ class VariableInputTypeAdapter(InputAdapter):
         input_type = type(statement)
 
         raise self.UnrecognizedInputFormatException(
-            'The type {} is not recognized as a valid input type.'.format(
-                input_type
-            )
+            f'The type {input_type} is not recognized as a valid input type.'
         )
 
     def process_input(self, statement):

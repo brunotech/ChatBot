@@ -46,9 +46,9 @@ def get_first_response(input_statement, response_list):
     :rtype: Statement
     """
     logger = logging.getLogger(__name__)
-    logger.info(u'Selecting first response from list of {} options.'.format(
-        len(response_list)
-    ))
+    logger.info(
+        f'Selecting first response from list of {len(response_list)} options.'
+    )
     return response_list[0]
 
 
@@ -65,7 +65,5 @@ def get_random_response(input_statement, response_list):
     """
     from random import choice
     logger = logging.getLogger(__name__)
-    logger.info(u'Selecting a response from list of {} options.'.format(
-        len(response_list)
-    ))
+    logger.info(f'Selecting a response from list of {len(response_list)} options.')
     return choice(response_list)

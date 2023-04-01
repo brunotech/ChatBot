@@ -45,8 +45,7 @@ class MathematicalEvaluation(LogicAdapter):
         corpus = Corpus()
 
         math_words_data_file_path = corpus.get_file_path(
-            'chatterbot.corpus.{}.math_words'.format(language),
-            extension='json'
+            f'chatterbot.corpus.{language}.math_words', extension='json'
         )
 
         try:
@@ -54,9 +53,7 @@ class MathematicalEvaluation(LogicAdapter):
                 return json.load(data)
         except IOError:
             raise self.UnrecognizedLanguageException(
-                'A math_words data file was not found for `{}` at `{}`.'.format(
-                    language, math_words_data_file_path
-                )
+                f'A math_words data file was not found for `{language}` at `{math_words_data_file_path}`.'
             )
 
     def can_process(self, statement):
@@ -88,9 +85,7 @@ class MathematicalEvaluation(LogicAdapter):
         response = Statement(text=expression)
 
         try:
-            response.text += '= ' + str(
-                eval(expression, {f: self.functions[f] for f in self.functions})
-            )
+            response.text += f'= {str(eval(expression, {f: self.functions[f] for f in self.functions}))}'
 
             # Replace '**' with '^' for evaluated exponents
             response.text = response.text.replace('**', '^')
@@ -119,7 +114,7 @@ class MathematicalEvaluation(LogicAdapter):
             for classifier in classifiers:
                 result = getattr(self, classifier)(chunk)
                 if result is not False:
-                    string += str(result) + ' '
+                    string += f'{str(result)} '
                     break
 
         # Replace '^' with '**' to evaluate exponents
@@ -165,20 +160,14 @@ class MathematicalEvaluation(LogicAdapter):
         If the string is an availbale mathematical function, returns
         said function. Otherwise, it returns False.
         """
-        if string in self.functions:
-            return string
-        else:
-            return False
+        return string if string in self.functions else False
 
     def is_operator(self, string):
         """
         If the string is an operator, returns
         said operator. Otherwise, it returns false.
         """
-        if string in '+-/*^()':
-            return string
-        else:
-            return False
+        return string if string in '+-/*^()' else False
 
     def normalize(self, string):
         """
@@ -225,13 +214,13 @@ class MathematicalEvaluation(LogicAdapter):
 
         for scale in self.math_words['scales']:
             condensed_string = re.sub(
-                '_' + scale,
+                f'_{scale}',
                 ' ' + self.math_words['scales'][scale],
-                condensed_string
+                condensed_string,
             )
 
         condensed_string = condensed_string.split('_')
-        for chunk_index in range(0, len(condensed_string)):
+        for chunk_index in range(len(condensed_string)):
             value = ''
 
             try:
@@ -241,7 +230,7 @@ class MathematicalEvaluation(LogicAdapter):
             except:
                 pass
 
-        for chunk_index in range(0, len(condensed_string)):
+        for chunk_index in range(len(condensed_string)):
             condensed_chunk = condensed_string[chunk_index]
             if self.is_integer(condensed_chunk) or self.is_float(condensed_chunk):
                 i = 1
@@ -254,7 +243,7 @@ class MathematicalEvaluation(LogicAdapter):
                 for sub_chunk in range(start_index, end_index):
                     condensed_string[sub_chunk] += ' +'
 
-                condensed_string[start_index] = '( ' + condensed_string[start_index]
+                condensed_string[start_index] = f'( {condensed_string[start_index]}'
                 condensed_string[end_index] += ' )'
 
         return ' '.join(condensed_string)

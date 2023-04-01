@@ -102,21 +102,17 @@ class JsonFileStorageAdapter(StorageAdapter):
             if '__' in kwarg:
                 kwarg_parts = kwarg.split('__')
 
-                key = kwarg_parts[0]
                 identifier = kwarg_parts[1]
 
                 if identifier == 'contains':
-                    text_values = []
-                    for val in values[key]:
-                        text_values.append(val['text'])
-
+                    key = kwarg_parts[0]
+                    text_values = [val['text'] for val in values[key]]
                     if (kwarguments[kwarg] not in text_values) and (
                             kwarguments[kwarg] not in values[key]):
                         return False
 
-            if kwarg in values:
-                if values[kwarg] != kwarguments[kwarg]:
-                    return False
+            if kwarg in values and values[kwarg] != kwarguments[kwarg]:
+                return False
 
         return True
 

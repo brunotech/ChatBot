@@ -16,18 +16,17 @@ class BestMatch(LogicAdapter):
         statement_list = self.chatbot.storage.get_response_statements()
 
         if not statement_list:
-            if self.chatbot.storage.count():
-                # Use a randomly picked statement
-                self.logger.info(
-                    'No statements have known responses. ' +
-                    'Choosing a random response to return.'
-                )
-                random_response = self.chatbot.storage.get_random()
-                random_response.confidence = 0
-                return random_response
-            else:
+            if not self.chatbot.storage.count():
                 raise self.EmptyDatasetException()
 
+            # Use a randomly picked statement
+            self.logger.info(
+                'No statements have known responses. ' +
+                'Choosing a random response to return.'
+            )
+            random_response = self.chatbot.storage.get_random()
+            random_response.confidence = 0
+            return random_response
         closest_match = input_statement
         closest_match.confidence = 0
 
@@ -52,30 +51,23 @@ class BestMatch(LogicAdapter):
 
         # Select the closest match to the input statement
         closest_match = self.get(input_statement)
-        self.logger.info('Using "{}" as a close match to "{}"'.format(
-            input_statement.text, closest_match.text
-        ))
-
-        # Get all statements that are in response to the closest match
-        response_list = self.chatbot.storage.filter(
-            in_response_to__contains=closest_match.text
+        self.logger.info(
+            f'Using "{input_statement.text}" as a close match to "{closest_match.text}"'
         )
 
-        if response_list:
+        if response_list := self.chatbot.storage.filter(
+            in_response_to__contains=closest_match.text
+        ):
             self.logger.info(
-                'Selecting response from {} optimal responses.'.format(
-                    len(response_list)
-                )
+                f'Selecting response from {len(response_list)} optimal responses.'
             )
             response = self.select_response(input_statement, response_list)
             response.confidence = closest_match.confidence
-            self.logger.info('Response selected. Using "{}"'.format(response.text))
+            self.logger.info(f'Response selected. Using "{response.text}"')
         else:
             response = self.chatbot.storage.get_random()
             self.logger.info(
-                'No response to "{}" found. Selecting a random response.'.format(
-                    closest_match.text
-                )
+                f'No response to "{closest_match.text}" found. Selecting a random response.'
             )
 
             # Set confidence to zero because a random response is selected

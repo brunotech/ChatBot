@@ -29,7 +29,7 @@ class Statement(models.Model):
 
     def __str__(self):
         if len(self.text.strip()) > 60:
-            return '{}...'.format(self.text[:57])
+            return f'{self.text[:57]}...'
         elif len(self.text.strip()) > 0:
             return self.text
         return '<empty>'
@@ -75,13 +75,9 @@ class Statement(models.Model):
         :param response_text: The text of the response to be removed.
         :type response_text: str
         """
-        is_deleted = False
         response = self.in_response.filter(response__text=response_text)
 
-        if response.exists():
-            is_deleted = True
-
-        return is_deleted
+        return bool(response.exists())
 
     def get_response_count(self, statement):
         """
@@ -106,16 +102,15 @@ class Statement(models.Model):
         :rtype: dict
         """
         import json
-        data = {}
-
         if not self.extra_data:
             self.extra_data = '{}'
 
-        data['text'] = self.text
-        data['in_response_to'] = []
-        data['created_at'] = self.created_at
-        data['extra_data'] = json.loads(self.extra_data)
-
+        data = {
+            'text': self.text,
+            'in_response_to': [],
+            'created_at': self.created_at,
+            'extra_data': json.loads(self.extra_data),
+        }
         for response in self.in_response.all():
             data['in_response_to'].append(response.serialize())
 
@@ -147,22 +142,14 @@ class Response(models.Model):
     def __str__(self):
         statement = self.statement.text
         response = self.response.text
-        return '{} => {}'.format(
-            statement if len(statement) <= 20 else statement[:17] + '...',
-            response if len(response) <= 40 else response[:37] + '...'
-        )
+        return f"{statement if len(statement) <= 20 else f'{statement[:17]}...'} => {response if len(response) <= 40 else f'{response[:37]}...'}"
 
     def serialize(self):
         """
         :returns: A dictionary representation of the statement object.
         :rtype: dict
         """
-        data = {}
-
-        data['text'] = self.response.text
-        data['occurrence'] = self.occurrence
-
-        return data
+        return {'text': self.response.text, 'occurrence': self.occurrence}
 
 
 class Conversation(models.Model):

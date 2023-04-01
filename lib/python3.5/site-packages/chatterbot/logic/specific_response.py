@@ -17,16 +17,9 @@ class SpecificResponseAdapter(LogicAdapter):
         self.response_statement = Statement(output_text)
 
     def can_process(self, statement):
-        if statement == self.input_text:
-            return True
-
-        return False
+        return statement == self.input_text
 
     def process(self, statement):
 
-        if statement == self.input_text:
-            self.response_statement.confidence = 1
-        else:
-            self.response_statement.confidence = 0
-
+        self.response_statement.confidence = 1 if statement == self.input_text else 0
         return self.response_statement

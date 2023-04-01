@@ -24,8 +24,8 @@ class Corpus(object):
 
         corpus_path = os.path.join(*parts)
 
-        if os.path.exists(corpus_path + '.{}'.format(extension)):
-            corpus_path += '.{}'.format(extension)
+        if os.path.exists(f'{corpus_path}.{extension}'):
+            corpus_path += f'.{extension}'
 
         return corpus_path
 
@@ -50,9 +50,11 @@ class Corpus(object):
 
         if os.path.isdir(corpus_path):
             for dirname, dirnames, filenames in os.walk(corpus_path):
-                for datafile in filenames:
-                    if datafile.endswith('corpus.json'):
-                        paths.append(os.path.join(dirname, datafile))
+                paths.extend(
+                    os.path.join(dirname, datafile)
+                    for datafile in filenames
+                    if datafile.endswith('corpus.json')
+                )
         else:
             paths.append(corpus_path)
 
@@ -70,7 +72,5 @@ class Corpus(object):
         for file_path in data_file_paths:
             corpus = self.read_corpus(file_path)
 
-            for key in list(corpus.keys()):
-                corpora.append(corpus[key])
-
+            corpora.extend(corpus[key] for key in list(corpus.keys()))
         return corpora

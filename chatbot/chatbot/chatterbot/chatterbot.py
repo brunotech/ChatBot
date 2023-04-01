@@ -38,7 +38,7 @@ class ChatBot(object):
         self.output = utils.initialize_class(output_adapter, **kwargs)
 
         filters = kwargs.get('filters', tuple())
-        self.filters = tuple([utils.import_module(F)() for F in filters])
+        self.filters = tuple(utils.import_module(F)() for F in filters)
 
         # Add required system logic adapter
         self.logic.system_adapters.append(
@@ -61,9 +61,9 @@ class ChatBot(object):
 
         self.preprocessors = []
 
-        for preprocessor in preprocessors:
-            self.preprocessors.append(utils.import_module(preprocessor))
-
+        self.preprocessors.extend(
+            utils.import_module(preprocessor) for preprocessor in preprocessors
+        )
         # Use specified trainer or fall back to the default
         trainer = kwargs.get('trainer', 'chatterbot.trainers.Trainer')
         TrainerClass = utils.import_module(trainer)
@@ -144,10 +144,9 @@ class ChatBot(object):
             statement.add_response(
                 Response(previous_statement.text)
             )
-            self.logger.info('Adding "{}" as a response to "{}"'.format(
-                statement.text,
-                previous_statement.text
-            ))
+            self.logger.info(
+                f'Adding "{statement.text}" as a response to "{previous_statement.text}"'
+            )
 
         # Save the statement after selecting a response
         if not self.read_only:

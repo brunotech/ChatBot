@@ -22,12 +22,7 @@ class Trainer(object):
         Return a statement if it exists.
         Create and return the statement if it does not exist.
         """
-        statement = self.storage.find(statement_text)
-
-        if not statement:
-            statement = Statement(statement_text)
-
-        return statement
+        return self.storage.find(statement_text) or Statement(statement_text)
 
     class TrainerInitializationException(Exception):
         """
@@ -49,9 +44,10 @@ class Trainer(object):
         result = []
 
         for statement in self.storage.filter():
-            for response in statement.in_response_to:
-                result.append([response.text, statement.text])
-
+            result.extend(
+                [response.text, statement.text]
+                for response in statement.in_response_to
+            )
         return result
 
     def export_for_training(self, file_path='./export.json'):
@@ -106,9 +102,8 @@ class ChatterBotCorpusTrainer(Trainer):
         trainer = ListTrainer(self.storage)
 
         # Allow a list of coupora to be passed instead of arguments
-        if len(corpora) == 1:
-            if isinstance(corpora[0], list):
-                corpora = corpora[0]
+        if len(corpora) == 1 and isinstance(corpora[0], list):
+            corpora = corpora[0]
 
         for corpus in corpora:
             corpus_data = self.corpus.load_corpus(corpus)
@@ -155,8 +150,7 @@ class TwitterTrainer(Trainer):
         random_word = random.choice(list(random_words))
         tweets = self.api.GetSearch(term=random_word, count=5)
         words = self.get_words_from_tweets(tweets)
-        word = random.choice(list(words))
-        return word
+        return random.choice(list(words))
 
     def get_words_from_tweets(self, tweets):
         """
@@ -189,7 +183,9 @@ class TwitterTrainer(Trainer):
         # Generate a random word
         random_word = self.random_word(self.random_seed_word)
 
-        self.logger.info(u'Requesting 50 random tweets containing the word {}'.format(random_word))
+        self.logger.info(
+            f'Requesting 50 random tweets containing the word {random_word}'
+        )
         tweets = self.api.GetSearch(term=random_word, count=50)
         for tweet in tweets:
             statement = Statement(tweet.text)
@@ -202,12 +198,12 @@ class TwitterTrainer(Trainer):
                 except TwitterError as error:
                     self.logger.warning(str(error))
 
-        self.logger.info('Adding {} tweets with responses'.format(len(statements)))
+        self.logger.info(f'Adding {len(statements)} tweets with responses')
 
         return statements
 
     def train(self):
-        for _ in range(0, 10):
+        for _ in range(10):
             statements = self.get_statements()
             for statement in statements:
                 self.storage.update(statement)
@@ -256,7 +252,7 @@ class UbuntuCorpusTrainer(Trainer):
             return file_path
 
         with open(file_path, 'wb') as open_file:
-            print('Downloading %s' % file_name)
+            print(f'Downloading {file_name}')
             response = requests.get(url, stream=True)
             total_length = response.headers.get('content-length')
 
@@ -326,7 +322,7 @@ class UbuntuCorpusTrainer(Trainer):
         )
 
         for file in glob.iglob(extracted_corpus_path):
-            self.logger.info('Training from: {}'.format(file))
+            self.logger.info(f'Training from: {file}')
 
             with open(file, 'r') as tsv:
                 reader = csv.reader(tsv, delimiter='\t')

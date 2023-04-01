@@ -116,14 +116,14 @@ class StorageAdapter(object):
         statement_list = self.filter()
 
         responses = set()
-        to_remove = list()
         for statement in statement_list:
             for response in statement.in_response_to:
                 responses.add(response.text)
-        for statement in statement_list:
-            if statement.text not in responses:
-                to_remove.append(statement)
-
+        to_remove = [
+            statement
+            for statement in statement_list
+            if statement.text not in responses
+        ]
         for statement in to_remove:
             statement_list.remove(statement)
 

@@ -16,7 +16,7 @@ class HipChat(OutputAdapter):
         self.hipchat_access_token = kwargs.get("hipchat_access_token")
         self.hipchat_room = kwargs.get("hipchat_room")
 
-        authorization_header = "Bearer {}".format(self.hipchat_access_token)
+        authorization_header = f"Bearer {self.hipchat_access_token}"
 
         self.headers = {
             'Authorization': authorization_header,
@@ -30,10 +30,7 @@ class HipChat(OutputAdapter):
         """
         import requests
 
-        message_url = "{}/v2/room/{}/message".format(
-            self.hipchat_host,
-            room_id_or_name
-        )
+        message_url = f"{self.hipchat_host}/v2/room/{room_id_or_name}/message"
 
         response = requests.post(
             message_url,

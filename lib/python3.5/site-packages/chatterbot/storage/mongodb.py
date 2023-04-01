@@ -167,10 +167,9 @@ class MongoDatabaseAdapter(StorageAdapter):
 
         # Convert Response objects to data
         if 'in_response_to' in kwargs:
-            serialized_responses = []
-            for response in kwargs['in_response_to']:
-                serialized_responses.append({'text': response})
-
+            serialized_responses = [
+                {'text': response} for response in kwargs['in_response_to']
+            ]
             query = query.statement_response_list_equals(serialized_responses)
             del kwargs['in_response_to']
 
@@ -194,12 +193,7 @@ class MongoDatabaseAdapter(StorageAdapter):
 
             matches = matches.sort(order_by, direction)
 
-        results = []
-
-        for match in list(matches):
-            results.append(self.mongo_to_object(match))
-
-        return results
+        return [self.mongo_to_object(match) for match in list(matches)]
 
     def update(self, statement):
         from pymongo import UpdateOne
@@ -207,15 +201,12 @@ class MongoDatabaseAdapter(StorageAdapter):
 
         data = statement.serialize()
 
-        operations = []
-
         update_operation = UpdateOne(
             {'text': statement.text},
             {'$set': data},
             upsert=True
         )
-        operations.append(update_operation)
-
+        operations = [update_operation]
         # Make sure that an entry for each response is saved
         for response_dict in data.get('in_response_to', []):
             response_text = response_dict.get('text')
@@ -280,16 +271,11 @@ class MongoDatabaseAdapter(StorageAdapter):
             }
         }
 
-        _statement_query.update(self.base_query.value())
+        _statement_query |= self.base_query.value()
 
         statement_query = self.statements.find(_statement_query)
 
-        statement_objects = []
-
-        for statement in list(statement_query):
-            statement_objects.append(self.mongo_to_object(statement))
-
-        return statement_objects
+        return [self.mongo_to_object(statement) for statement in list(statement_query)]
 
     def drop(self):
         """

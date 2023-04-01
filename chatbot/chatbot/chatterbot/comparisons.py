@@ -46,10 +46,7 @@ def levenshtein_distance(statement, other_statement):
         other_statement_text
     )
 
-    # Calculate a decimal percent of the similarity
-    percent = round(similarity.ratio(), 2)
-
-    return percent
+    return round(similarity.ratio(), 2)
 
 
 def synset_distance(statement, other_statement):

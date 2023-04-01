@@ -27,17 +27,18 @@ class Mailgun(OutputAdapter):
             self.endpoint,
             auth=('api', self.api_key),
             data={
-                'from': '%s <%s>' % (self.name, from_address),
+                'from': f'{self.name} <{from_address}>',
                 'to': recipients,
                 'subject': subject,
-                'text': text
-            })
+                'text': text,
+            },
+        )
 
     def process_response(self, statement, session_id=None):
         """
         Send the response statement as an email.
         """
-        subject = 'Message from %s' % (self.name)
+        subject = f'Message from {self.name}'
 
         self.send_message(
             subject,

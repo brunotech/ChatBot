@@ -42,9 +42,7 @@ class FixedSizeQueue(object):
         """
         Return the most recent item put in the queue.
         """
-        if self.empty():
-            return None
-        return self.queue[-1]
+        return None if self.empty() else self.queue[-1]
 
     def flush(self):
         """
@@ -63,8 +61,7 @@ class ResponseQueue(FixedSizeQueue):
         """
         Return the last statement that was received.
         """
-        previous_interaction = self.peek()
-        if previous_interaction:
+        if previous_interaction := self.peek():
             # Return the output statement
             return previous_interaction[1]
         return None
@@ -73,8 +70,7 @@ class ResponseQueue(FixedSizeQueue):
         """
         Return the last response that was given.
         """
-        previous_interaction = self.peek()
-        if previous_interaction:
+        if previous_interaction := self.peek():
             # Return the input statement
             return previous_interaction[0]
         return None

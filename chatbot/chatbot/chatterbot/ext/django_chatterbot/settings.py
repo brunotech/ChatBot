@@ -1,6 +1,7 @@
 """
 Default ChatterBot settings for Django.
 """
+
 from django.conf import settings
 
 
@@ -13,5 +14,4 @@ CHATTERBOT_DEFAULTS = {
     'output_adapter': 'chatterbot.output.OutputAdapter'
 }
 
-CHATTERBOT = CHATTERBOT_DEFAULTS.copy()
-CHATTERBOT.update(CHATTERBOT_SETTINGS)
+CHATTERBOT = CHATTERBOT_DEFAULTS | CHATTERBOT_SETTINGS

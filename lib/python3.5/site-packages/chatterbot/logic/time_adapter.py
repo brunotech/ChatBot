@@ -40,16 +40,12 @@ class TimeLogicAdapter(LogicAdapter):
         """
         Provide an analysis of significan features in the string.
         """
-        features = {}
-
         all_words = " ".join(self.positive + self.negative).split()
 
-        for word in text.split():
-            features['contains({})'.format(word)] = (word in all_words)
-
+        features = {f'contains({word})': (word in all_words) for word in text.split()}
         for letter in 'abcdefghijklmnopqrstuvwxyz':
-            features['count({})'.format(letter)] = text.lower().count(letter)
-            features['has({})'.format(letter)] = (letter in text.lower())
+            features[f'count({letter})'] = text.lower().count(letter)
+            features[f'has({letter})'] = (letter in text.lower())
 
         return features
 
